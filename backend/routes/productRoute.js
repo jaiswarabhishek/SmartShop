@@ -1,9 +1,20 @@
 const express = require('express');
-const { getAllProductes } = require('../controller/productController');
+const { getProducts,createProduct,updateProduct,deleteProduct,getProductById, searchProduct,getAllProductes  } = require('../controller/productController');
 const router = express.Router();
+const {auth, authorizeRoles} = require('../middleware/auth')
 
-router.route('/products').get(getAllProductes);
+// auth middleware is used to protect the route from unauthorized access 
 
+// authorizeRoles check user is admin or not
+
+
+router.route('/products').get(getProducts);
+router.route('/products/new').post(auth,authorizeRoles("admin"), createProduct);
+router.route('/products/:id').put(auth,authorizeRoles("admin"),updateProduct);
+router.route('/products/:id').delete(auth,authorizeRoles("admin"),deleteProduct);
+router.route('/products/:id').get(getProductById);
+router.route('/products/search/:query').get(searchProduct)
+router.route('/allproducts').get(getAllProductes)
 
 
 module.exports = router;
