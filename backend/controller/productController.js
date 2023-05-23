@@ -13,6 +13,7 @@ exports.createProduct = async (req, res ) => {
       price,
       quantity,
       images
+
     });
 
     await product.save();
@@ -47,6 +48,7 @@ exports.updateProduct = async (req, res) => {
     product.quantity = quantity || product.quantity;
     product.images = images || product.images;
     product.rating = rating || product.rating;
+   
 
     const updatedProduct = await product.save();
 
@@ -137,8 +139,9 @@ exports.searchProduct = async (req, res) => {
 
 // Pagination & Filter Functionality
 exports.getProducts = async (req, res, next) => {
+ 
   try {
-    const { page = 1, limit = 10, category, priceMin, priceMax, ratingMin, ratingMax } = req.query;
+    const { page = 1, limit = 8, category, priceMin, priceMax, ratingMin, ratingMax } = req.query;
 
     // Build query object based on request parameters
     const query = {};
@@ -180,9 +183,234 @@ exports.getProducts = async (req, res, next) => {
       totalResults: totalProducts
     });
   } catch (error) {
-    next(error);
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+   
   }
 };
+
+
+
+// Create New Review or Update Existing Review
+exports.createOrUpdateReview = async (req, res) => {
+  try {
+   
+    const userId = req.user._id;
+    const { rating, comment, productId } = req.body;
+    console.log(rating + " " + comment + " " + productId + " " + userId)
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if the user has already reviewed the product
+    const existingReview = product.reviews.find(
+      (r) => r.user.toString() === userId.toString()
+    );
+
+    if (existingReview) {
+      // Update existing review
+      existingReview.rating = rating;
+      existingReview.comment = comment;
+    } else {
+      // Create new review
+      const review = {
+        user: userId,
+        name: req.user.name,
+        rating: rating,
+        comment: comment,
+      };
+      product.reviews.push(review);
+    }
+
+     product.numOfReviews = product.reviews.length;
+
+    // Recalculate product rating
+    const totalReviews = product.reviews.length;
+    const totalRating = product.reviews.reduce(
+      (acc, item) => Number(item.rating) + acc,
+      0
+    );
+    console.log(totalRating + " " + totalReviews)
+
+   
+    product.ratings = totalRating / totalReviews;
+
+    // Save product and return updated review information
+    const updatedProduct = await product.save();
+
+    res.status(201).json({
+      message: "Review added/updated successfully",
+      review: updatedProduct.reviews.find(
+        (r) => r.user.toString() === userId.toString()
+      ),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// Get All Reviews
+
+exports.getAllReviews = async (req, res) => {
+ console.log(req.query.productId)
+  try {
+    const productId = req.params.id;
+    
+    const products = await Product.find({ _id:req.query.productId });
+    console.log(products)
+
+    if (!products) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    
+
+
+    res.status(200).json(products[0].reviews);
+
+  }
+  catch(error)
+  {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+
+
+// Delete Review There is bug in this function will be fixed soon
+
+exports.deleteReview = async (req, res) => {
+ 
+  const { productId, reviewId } = req.query;
+ 
+
+
+  try {
+    // Find the product
+    const product = await Product.findById(productId);
+
+    // Check if product exists
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Find the review to be deleted
+    const review = product.reviews.find((review) => review._id.toString() === reviewId);
+
+    // Check if review exists
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    // Check if user is authorized to delete review
+    if (review.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'You are not authorized to delete this review' });
+    }
+
+    // Remove the review from the array
+    product.reviews = product.reviews.filter((review) => review._id.toString() !== reviewId.toString());
+
+   
+  
+
+    // Update the product's ratings and number of reviews
+    if(product.reviews.length > 0) 
+    product.ratings = product.reviews.reduce((total, review) => total + Number(review.rating), 0) / product.reviews.length;
+    else
+    product.ratings = 0;
+
+    product.numOfReviews = product.reviews.length;
+
+
+
+    // Save the updated product
+    await product.save();
+
+   res.status(200).json({ message: 'Review deleted successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting review', error });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -251,10 +479,3 @@ exports.getProducts = async (req, res, next) => {
 //        res.status(500).json({ message: 'Internal server error' });
 //   }
 // };
-
-
-
-
-
-
-
