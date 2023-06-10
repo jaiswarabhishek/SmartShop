@@ -1,5 +1,5 @@
 
-<h2> align="center">SmartShop</h2>
+<h2 align="center">SmartShop</h2>
 
 Welcome to the MERN SmartShop e-commerce website! This project is built using the MERN stack, which includes MongoDB, Express.js, React.js, and Node.js. It provides a comprehensive platform for online retail businesses and offers a seamless shopping experience for customers.
 
