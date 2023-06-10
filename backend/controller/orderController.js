@@ -71,9 +71,6 @@ exports.myOrders = async (req, res, next) => {
                     return res.status(404).json({ error: 'Order not found' });
                 }
 
-
-
-
                 res.status(200).json({
                     success: true,
                     orders

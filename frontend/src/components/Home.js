@@ -56,7 +56,7 @@ function Home() {
        { loading? <Loader/>: <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             
           {products&&products.map((product) => (
-            <Product id={product._id} name={product.name} price={product.price} image={product.images} rating={product.rating} reviewsCount={product.numOfReviews}  />
+            <Product id={product._id} name={product.name} price={product.price} image={product.images} rating={product.rating} ratings={product.ratings} reviewsCount={product.numOfReviews}  />
             
           ))}
         </div>

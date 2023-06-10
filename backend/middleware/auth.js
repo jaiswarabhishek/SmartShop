@@ -4,9 +4,12 @@ const User = require('../model/userModel')
 
 // Middleware function to verify JWT token
 const auth = async(req, res, next) => {
-  // Get the token from the cookie
-  const token = req.cookies.token;
+  
+  const token = req.cookies.token 
 
+
+
+ 
 
   // If the token doesn't exist, return an error
   if (!token) {
@@ -21,7 +24,7 @@ const auth = async(req, res, next) => {
     req.userId = decoded.id;
 
     req.user = await User.findById(req.userId).select('-password');
-    console.log(req.user);
+   
 
 
 

@@ -8,10 +8,27 @@ const generateTokenAndSetCookie = require('../utils/jwtToken');
 const userPng =
   "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"; //default profile pic for the user
 
+  const cloudinary = require('cloudinary');
+
+
 
 // Create New user or Signup
 exports.createNewUser= async(req,res)=>{
-   const { name, email, password,avatar } = req.body;
+
+  
+
+  const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
+
+
+  
+
+   const { name, email, password } = req.body;
+
+   
    
    // Validate name,email & password
    if(!name || !email || !password)
@@ -38,17 +55,23 @@ exports.createNewUser= async(req,res)=>{
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create New User 
-   const user = new User({ name, email:email.toLowerCase(), password: hashedPassword,avatar:{
-    public_id:"PUBLIC ID",
-    url:userPng
-   } });
+    const user = new User({
+      name,
+      email,
+      password:hashedPassword,
+      avatar:{
+        public_id:myCloud.public_id,
+        url:myCloud.secure_url
+      }
+    })
 
     await user.save();
 
 
 
+
     // Generate a JWT token and store it in a cookie with a two-day expiration time
-  generateTokenAndSetCookie(res, user._id);
+  generateTokenAndSetCookie(res, user);
 
   }
   catch(err){
@@ -87,10 +110,15 @@ exports.loginUser = async(req,res)=>{
     if(!isMatch)
     return res.status(400).json({error:"Invalid Password"})
 
+
+  
+  
      // Generate a JWT token and store it in a cookie with a two-day expiration time
-  generateTokenAndSetCookie(res, user._id);
-
-
+      
+      generateTokenAndSetCookie(res, user);
+ 
+  
+   
     }
 
     catch(err){
@@ -101,11 +129,15 @@ exports.loginUser = async(req,res)=>{
 
 // Logout
 exports.logout = (req, res) => {
-  // Clear the token cookie by setting its value to an empty string and an expiration date in the past
-  res.cookie('token', '', { expires: new Date(0) });
+  
+  res.cookie('token', null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
 
-  // Send a success response
-  res.status(200).json({ message: 'Logout successful' });
+  res.status(200).json({ success: true, message: 'Logged out' });
+
+
 };
 
 // Forgot Password
@@ -159,7 +191,8 @@ exports.forgotPassword = async (req, res, next) => {
 
 
   } catch (err) {
-    next(err);
+    console.log(err);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -167,11 +200,18 @@ exports.forgotPassword = async (req, res, next) => {
 // Function to get a single user by ID
 exports.getUserDetails = async (req, res) => {
   try {
+    
     const user = await User.findById(req.user._id).select('-password'); // select all user fields except the password field
+
+  
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json(user);
+
+
+    res.json({success:true,user});
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -183,28 +223,48 @@ exports.getUserDetails = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+   
+    
+
     const user = await User.findById(req.user._id).select('+password');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.name = name || user.name;
-    user.email = email || user.email;
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-    }
+    if(req.body.name !== '')
+    user.name = req.body.name;
 
+    if(req.body.email !== '')
+    user.email = req.body.email;
+
+    console.log(user.email)
+
+
+    if(req.body.avatar !== ''){
+
+      const image_id = user.avatar.public_id;
+
+      const res = await cloudinary.v2.uploader.destroy(image_id);
+
+      const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        folder: "avatars",
+        width: 150,
+        crop: "scale",
+      });
+
+      user.avatar = {
+        public_id:myCloud.public_id,
+        url:myCloud.secure_url
+      }
+
+    }
+   
+
+  
     const updatedUser = await user.save();
 
-    return res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-    });
+    res.json({success:true,updatedUser});
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

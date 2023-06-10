@@ -9,12 +9,26 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
+import DetailsUser from './DetailsUser';
+import {reactLocalStorage} from 'reactjs-localstorage';
+import { useState } from 'react';
+import { useSelector,useDispatch } from 'react-redux';
 
 
 
 
 
-function Header() {
+function Header({isAuthenticated, user  }  ) {
+
+     const dispatch = useDispatch()
+
+    const { cartItems } = useSelector(state => state.cart)
+
+
+
+  
+
+  
 
   const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -32,7 +46,7 @@ function Header() {
   // <div className='bg-[#24292e]'>
         <nav className="sticky top-0 z-10 bg-white">
 
-            <div className='md:flex  p-5 justify-between bg-gray-800'>
+            <div className='md:flex  p-3 justify-between align-middle bg-gray-800'>
                 {/* logo */}
                 <div>
               <h3 className='cursor-pointer flex text-[#fff]  font-serif md:text-3xl text-xl  '>
@@ -42,10 +56,10 @@ function Header() {
 
                 </div>
                 {/* links */}
-                <div className='md:block hidden  gap-4'>
-               <ul className='text-[1.1em]' >
+                <div className='md:block hidden my-auto  gap-4'>
+               <ul className='text-[1.1em]  ' >
                 <Link to="/" className='m-5 text-[#fff]'>Home</Link>
-                <Link to="/product" className='m-5 text-[#fff]'>Products</Link>
+                <Link to="/products" className='m-5 text-[#fff]'>Products</Link>
                 <Link to="/contact" className='m-5 text-[#fff]'>Contact</Link>
                 <Link to="/about" className='m-5 text-[#fff]'>About</Link>
                </ul>
@@ -54,21 +68,25 @@ function Header() {
                 {/* login,profile,search */}
                 <div className='md:block hidden  gap-4 '>
                
-                   <Link  >
+                   <Link to="/search"  >
                    <SearchIcon  sx={{width:30,height:30,marginRight:3,color:'white' }}    />
                    </Link>
 
 
-                   <Link >
-                <StyledBadge badgeContent={0} color="primary">
+                   <Link to='/cart' >
+                <StyledBadge badgeContent={cartItems.length || 0} color="primary">
                  <ShoppingCartIcon  sx={{width:30,height:30,marginRight:3,color:'white' }} />
                </StyledBadge>
                    </Link>
 
 
-                   <Link >
+                 {
+                    isAuthenticated ? <DetailsUser user={user} /> :
+                   <Link to='/login' >
                      <AccountBoxIcon sx={{width:30,height:30,marginRight:3,color:'white' }} className='text-[#fff]'/>
                    </Link>
+
+                  }
 
                 </div>
                 {/* hamburger */}

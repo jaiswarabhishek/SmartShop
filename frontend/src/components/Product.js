@@ -14,7 +14,7 @@ import StarRatingComponent from 'react-star-rating-component'
 
 
 
-function Product({id,name,price,image,rating,reviewsCount}) {
+function Product({id,name,price,image,rating,reviewsCount,ratings}) {
   
   return (
     <Link to={`/product/${id} `} >
@@ -29,7 +29,7 @@ function Product({id,name,price,image,rating,reviewsCount}) {
                  color= "gray"
                  activeColor= "yellow"
                  size= "window.innerWidth < 768 ? 20 : 30"
-                 value= {rating}
+                 value= {ratings}
                  isHalf= "true"
                 />
                 {/* number of reviews */}

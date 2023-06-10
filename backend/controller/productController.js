@@ -1,24 +1,59 @@
 const Product = require('../model/productModel')
+const cloudinary = require('cloudinary')
 
 // Create Product Admin
 exports.createProduct = async (req, res ) => {
-  const { name, description, category, brand, price, quantity, images } = req.body;
+  const { name, description, category, price, quantity} = req.body;
+
+  let images = []
+
+  if(  typeof req.body.image === 'string'){
+images.push(req.body.image)
+  }
+  else{
+    images = req.body.image
+
+  }
+
+  const imagesLink = []
+
+
+  for(let i =0 ; i<images.length; i++){
+    const result = await cloudinary.v2.uploader.upload(images[i],{
+      folder:'products'
+    })
+
+    console.log(result)
+
+    imagesLink.push({
+      public_id:result.public_id,
+      url: result.secure_url
+    })
+
+
+  }
+
+  req.body.image= imagesLink
+
+  const {image} = req.body
+
+  
+
 
   try {
     const product = new Product({
       name,
       description,
       category,
-      brand,
       price,
       quantity,
-      images
-
+      images:imagesLink
+    
     });
 
     await product.save();
 
-    res.status(201).json({ message: 'Product created successfully', product });
+    res.status(201).json({ success: 'Product created successfully', product });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -30,7 +65,8 @@ exports.createProduct = async (req, res ) => {
 
 //Update Products Admin
 exports.updateProduct = async (req, res) => {
-  const { name, description, category, brand, price, quantity, images,rating } = req.body;
+  const { name, description, category, brand, price, quantity, image,rating } = req.body;
+  console.log(req.body)
   const productId = req.params.id;
 
   try {
@@ -46,11 +82,48 @@ exports.updateProduct = async (req, res) => {
     product.brand = brand || product.brand;
     product.price = price || product.price;
     product.quantity = quantity || product.quantity;
-    product.images = images || product.images;
     product.rating = rating || product.rating;
+
+    if (image) {
+      // Delete images associated with the product
+      for (let i = 0; i < product.images.length; i++) {
+        await cloudinary.v2.uploader.destroy(product.images[i].public_id);
+      }
+
+      // Upload new images
+      const imagesLink = [];
+
+      for (let i = 0; i < image.length; i++) {
+        const result = await cloudinary.v2.uploader.upload(image[i], {
+          folder: 'products',
+        });
+
+        imagesLink.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+
+      product.images = imagesLink;
+    }
+
+
+
+ // update product 
+    const updatedProduct = await product.save(
+      { validateBeforeSave: false,
+        runValidators: false,
+      }
+    );
+
    
 
-    const updatedProduct = await product.save();
+   
+   
+
+
+
+    
 
     res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
   } catch (error) {
@@ -86,6 +159,7 @@ exports.deleteProduct = async (req, res) => {
 // Get Single Product
 exports.getProductById = async (req, res) => {
   const productId = req.params.id;
+  
 
 
   try {
@@ -111,7 +185,7 @@ exports.getAllProductes= async(req,res)=>{
     try{
         const products = await Product.find();
         
-        res.status(200).json(products)
+    res.status(200).json({success:true,products})
 
     }
     catch(err){
@@ -127,7 +201,7 @@ exports.searchProduct = async (req, res) => {
   try {
     const query = req.params.query;
       if (query.length === 0) return;
-    const products = await Product.find( {name: { $regex: query, $options: "i" }});
+    const Searchproducts = await Product.find( {name: { $regex: query, $options: "i" }});
     res.status(200).json(products);
   } catch (error) {
      console.error(error);
@@ -141,8 +215,11 @@ exports.searchProduct = async (req, res) => {
 exports.getProducts = async (req, res, next) => {
  
   try {
-    const { page = 1, limit = 8, category, priceMin, priceMax, ratingMin, ratingMax } = req.query;
+    const { page = 1, limit = 8, category, priceMin, priceMax, ratingMin=0,keyword=""} = req.query;
+    
+    
 
+ 
     // Build query object based on request parameters
     const query = {};
     if (category) {
@@ -157,15 +234,18 @@ exports.getProducts = async (req, res, next) => {
         query.price.$lte = priceMax;
       }
     }
-    if (ratingMin || ratingMax) {
-      query.rating = {};
-      if (ratingMin) {
-        query.rating.$gte = ratingMin;
-      }
-      if (ratingMax) {
-        query.rating.$lte = ratingMax;
-      }
+    if (ratingMin) {
+      query.ratings = {};
+     
+       if (ratingMin)
+        query.ratings.$gte = ratingMin;
+     
+    
     }
+
+    // if (keyword) {
+    //   query.name = { $regex: keyword, $options: 'i' };
+    // }
 
     // Calculate total number of matching products
     const totalProducts = await Product.countDocuments(query);
@@ -173,13 +253,28 @@ exports.getProducts = async (req, res, next) => {
     // Apply pagination
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
+
+    // Total pages
+    
+
+
     const results = await Product.find(query).sort({ price: 'asc' }).limit(limit).skip(startIndex);
+    
+    
+    
+    const Searchproducts = await Product.find( {name: { $regex: keyword , $options: "i" }});
+
+   // conver page to Number
+
+
 
     // Return paginated results and total number of products
     res.status(200).json({
       results,
+      limit,
+      Searchproducts,
       totalPages: Math.ceil(totalProducts / limit),
-      currentPage: page,
+      currentPage: Number(page),
       totalResults: totalProducts
     });
   } catch (error) {
