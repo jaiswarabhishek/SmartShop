@@ -6,7 +6,7 @@ Welcome to the MERN SmartShop e-commerce website! This project is built using th
 
  > **Warning**: This project is still under development and is not ready for production use. Please feel free to explore the codebase and try out the features. However, do not use it for any commercial purposes.
 
-## Tech-Stack
+## ⚙️ Tech-Stack
 
 The SmartShop e-commerce website utilizes the following technologies:
 
@@ -20,7 +20,7 @@ The SmartShop e-commerce website utilizes the following technologies:
 - **Chart.js**: A JavaScript library for creating beautiful charts and graphs.
   
 
-## Installation
+## 🛠️ Installation
 
 To run the SmartShop e-commerce website locally, please follow these steps:
 
@@ -49,7 +49,7 @@ To run the SmartShop e-commerce website locally, please follow these steps:
    npm install
    ```
 
-4. Configure environment variables:
+4. 🔑 Configure environment variables:
 
    - Create a `.env` file in the config folder from the backend directory 
    - Set the following environment variables:
@@ -58,7 +58,7 @@ To run the SmartShop e-commerce website locally, please follow these steps:
      - ` STRIPE_PUBLISH_KEY `: The client ID for integrating Stripe payments.
      - ` STRIPE_SECRET_KEY `: The secret key for integrating Stripe payments.
 
-5. Start the development server:
+5. ⌛️ Start the development server:
 
    ```bash
    # Start the server
@@ -70,9 +70,9 @@ To run the SmartShop e-commerce website locally, please follow these steps:
    npm start
    ```
 
-6. Open your browser and navigate to `http://localhost:3000` to access the SmartShop e-commerce website.
+6. 💻 Open your browser and navigate to `http://localhost:3000` to access the SmartShop e-commerce website.
 
-## Features
+## 📺 Features
 
 Once the SmartShop e-commerce website is up and running, you can perform the following actions:
 
