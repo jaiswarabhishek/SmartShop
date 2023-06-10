@@ -1,5 +1,5 @@
 const Stripe = require('stripe');
-const stripe = Stripe('sk_test_51NFUBASHxOt6lyfOccpjSB2F2hnEtn838r3kdo51Mh1z5CGt1X0VFe07597oBrt5j3fSphHUKYgbVPMubfPeNgsv00aUyDyHWz');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 exports.processPayment =async (req, res) => {
 
