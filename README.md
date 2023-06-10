@@ -1,8 +1,8 @@
-# MERN SmartShop E-commerce Website
+# SmartShop 
 
 Welcome to the MERN SmartShop e-commerce website! This project is built using the MERN stack, which includes MongoDB, Express.js, React.js, and Node.js. It provides a comprehensive platform for online retail businesses and offers a seamless shopping experience for customers.
 
-## Tech Stack
+## Tech-Stack
 
 The SmartShop e-commerce website utilizes the following technologies:
 
@@ -10,6 +10,11 @@ The SmartShop e-commerce website utilizes the following technologies:
 - **Express.js**: A robust web application framework for handling server-side operations and routing.
 - **React.js**: A popular JavaScript library for building dynamic and interactive user interfaces.
 - **Node.js**: A runtime environment for executing server-side JavaScript code.
+- **Redux**: A predictable state container for managing application state.
+- **Tailwind CSS**: A utility-first CSS framework for designing responsive web pages.
+- **Stripe**: A payment processing platform for securely accepting payments online.
+- **Chart.js**: A JavaScript library for creating beautiful charts and graphs.
+  
 
 ## Installation
 
@@ -63,11 +68,13 @@ To run the SmartShop e-commerce website locally, please follow these steps:
 
 6. Open your browser and navigate to `http://localhost:3000` to access the SmartShop e-commerce website.
 
-## Usage
+## Features
 
 Once the SmartShop e-commerce website is up and running, you can perform the following actions:
 
+- User-friendly and intuitive interface for an exceptional shopping experience.
 - Browse through various product categories.
+- Robust authentication and authorization system for secure user accounts.
 - Search for specific products using the search feature.
 - Add items to your shopping cart.
 - Proceed to the checkout process and securely complete the purchase.
